@@ -1,3 +1,14 @@
+/**
+ * @author Diego Martinez
+ * */
+ 
+/**
+ * Represents the in-game camera
+ * @class Camera
+ * @param {number} x - Starting X coordinate
+ * @param {number} y - Starting Y coordinate
+ */
+
 function Camera(x, y) {
     this.active = true;
     this.anchored = false;
@@ -38,18 +49,57 @@ Camera.prototype = {
         this.zoom = 1;
     },
     
+    /**
+     * Stops any following and removes anchors
+     * 
+     * @memberof Camera
+     * @instance
+     * @func stopFollow
+     * */
     
+    stopFollow : function(){
+        this.following = undefined;
+        this.anchored = false;
+    },
+    
+    /**
+     * Anchors ingame camera to specified coordinates
+     * 
+     * @memberof Camera
+     * @instance
+     * @func setAnchor
+     * @param {number} x - X coordinate to anchor to
+     * @param {number} y - Y coordindate to anchor to
+     */
+     
     setAnchor: function(x, y) {
         this.anchored = true;
         this.anchor = (this.anchor != undefined) ? this.anchor.update(x, y) : new Coordinate(x, y);
     },
 
-    setFollow: function(sprite, active) {
-        if(active){
-            
-        }
+    /**
+     * Anchors camera to a sprite and forces it to follow
+     * 
+     * @memberof Camera
+     * @instance
+     * @func setFollow
+     * @param {Sprite} sprite - Sprite to follow
+     * 
+     * */
+     
+    setFollow: function(sprite) {
+        this.anchored = true;
+        this.following = sprite;
     },
-
+    
+    /**
+     * Sets the camera zoom 
+     * @memberof Camera
+     * @instance
+     * @func setZoom
+     * @param {number} zoom - Sets zoom amount
+     */
+     
     setZoom: function(zoom) {
 
         if (this.zoom > 1 || zoom > 0) {
@@ -60,11 +110,20 @@ Camera.prototype = {
         this.screen.clearWidth = this.screen.width * (100 / this.zoom);
         this.screen.clearHeight = this.screen.height * (100 / this.zoom);
     },
-
-//will add and remove objects from the World active object array
-//probably won't crash if there are no active objects
     
+    /**
+     * Updates active scope
+     * @memberof Camera
+     * @instance
+     * @func updateActive
+     */
     updateActive: function(){
+        
+        if(this.x < 0)
+            this.x = 0;
+        if(this.y < 0)
+            this.y = 0;
+        
         let obj = this.game.activeObjects;
         let len = obj.length;
         
