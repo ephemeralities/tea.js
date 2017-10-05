@@ -1,3 +1,11 @@
+/**
+ * Creates an instance of a Game
+ * @class Game
+ * @param {number} width - specifies the width of the game screen's viewport
+ * @param {number} height - specifies the height of the game screen's viewport
+ * @param {boolean} antialiasing - sets whether antialiasing is active or not
+ */
+ 
 function Game(width, height, antialiasing = false) {
     this.activeObjects = [];
     this.freeSpaces = [];
@@ -27,12 +35,29 @@ function Game(width, height, antialiasing = false) {
 }
 
 Game.prototype = {
+    
+    /**
+     * Adds sprite to the game
+     * @memberof Game.prototype
+     * @instance
+     * @function add
+     * @param {Sprite} sprite - Sprite to be added
+     */
+     
     add: function(sprite) {
         this.objects.push(sprite);
         let i = this.objects.length - 1;
         this.sprites.add(this.objects[i]);
     },
 
+    /**
+     * Adds Sprite to the active scope
+     * @memberof Game 
+     * @instance
+     * @func addToActive
+     * @param {Sprite} sprite - Sprite to be added
+     */
+     
     addToActive: function(sprite) {
         let space = this.freeSpaces.pop();
         sprite.active = true;
@@ -53,10 +78,26 @@ Game.prototype = {
         }
     },
 
+    /**
+     * Specifies the directory in which image assets are stored
+     * @memberof Game
+     * @instance
+     * @func changeDirectory
+     * @param {String} [newDirectory = "assets/"] - New directory
+     */
+     
     changeDirectory: function(newDirectory) {
         this.directory = newDirectory + "/";
     },
-
+    
+    /**
+     * Deletes all instances of sprite from the game
+     * @memberof Game 
+     * @instance
+     * @func delete
+     * @param {Sprite} sprite - Sprite to be deleted
+     */
+     
     delete: function(sprite) {
         let i = this.objects.indexOf(sprite);
         if(i.active == false)
@@ -66,7 +107,15 @@ Game.prototype = {
             this.objects[i] = undefined;
         }
     },
-
+    
+    /**
+     * Removes sprite from active scope
+     * 
+     * @memberof Game 
+     * @instance
+     * @func removeActive
+     * @param {Sprite} sprite - Sprite to be removed from active scope
+     */
     removeActive: function(sprite) {
         sprite.active = false;
         sprite.memory.update();
@@ -80,7 +129,14 @@ Game.prototype = {
         this.activeObjects[index] = undefined;
         this.freeSpaces.push(index);
     },
-
+    
+    /**
+     * Updates the world
+     * 
+     * @memberof Game 
+     * @instance
+     * @func update
+     */
     update: function() {
         this.camera.updateActive();
         this.screen.drawActive();
