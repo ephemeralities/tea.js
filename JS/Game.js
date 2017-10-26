@@ -7,144 +7,119 @@
  */
  
 function Game(width, height, antialiasing = false) {
-    this.activeObjects = [];
-    this.freeSpaces = [];
-    this.camera = new Camera(0, 0);
+    this.running = true;
+    this.effects = new EffectsRenderer(this);
+    this.manager = new ObjectManager(this);
+    this.timer = new Timer(this);
+    this.camera = new Camera(0, 0, this, this.manager);
     this.directory = "assets/";
     this.keys = new Keys();
     this.sprites = new SpriteContainer();
-    this.objects = [];
-    this.objectPositions = [];
-    this.screen = new Screen(width, height, antialiasing);
-    this.variable = {};
+    this.display = new Display(width, height, antialiasing, this);
 
     Sprite.prototype.game = this;
-    Camera.prototype.game = this;
-    Camera.prototype.activeObjects = this.activeObjects;
-    Camera.prototype.screen = this.screen;
-    Screen.prototype.game = this;
-    Screen.prototype.activeObjects = this.activeObjects;
+    Sprite.prototype.manager = this.manager;
+    Sprite.prototype.effects = this.effects;
+
+    SimpleSprite.prototype.game = this;
+    SimpleSprite.prototype.manager = this.manager;
+
+    Camera.prototype.display = this.display;
+
     Keys.prototype.game = this;
 
-    window.addEventListener("load", this.worldInitialize);
+    window.addEventListener("load", this.start);
     window.addEventListener("keydown", this.keys.keyActive);
     window.addEventListener("keyup", this.keys.keyInactive);
     window.Key = this.keys;
-    window.Variable = this.variable;
     window.Sprites = this.sprites;
 }
 
 Game.prototype = {
-    
-    /**
-     * Adds sprite to the game
-     * @memberof Game.prototype
-     * @instance
-     * @function add
-     * @param {Sprite} sprite - Sprite to be added
-     */
-     
-    add: function(sprite) {
-        this.objects.push(sprite);
-        let i = this.objects.length - 1;
-        this.sprites.add(this.objects[i]);
-    },
-
-    /**
-     * Adds Sprite to the active scope
-     * @memberof Game 
-     * @instance
-     * @func addToActive
-     * @param {Sprite} sprite - Sprite to be added
-     */
-     
-    addToActive: function(sprite) {
-        let space = this.freeSpaces.pop();
-        sprite.active = true;
-
-        if(space == undefined)
-            this.activeObjects.push(sprite);
-        else
-            this.activeObjects[space] = sprite;
-    },
-
-    changeLayer: function(layers, sprite) {
-        let spritePosition = this.activeObjects.indexOf(sprite);
-        if(spritePosition >= 0) {
-            let sprite1 = this.activeObjects[spritePosition];
-            let sprite2 = this.activeObjects[spritePosition + layers];
-            this.activeObjects[spritePosition] = sprite2;
-            this.activeObjects[spritePosition + layers] = sprite1;
-        }
-    },
 
     /**
      * Specifies the directory in which image assets are stored
-     * @memberof Game
-     * @instance
+     * @memberof Game.prototype
      * @func changeDirectory
      * @param {String} [newDirectory = "assets/"] - New directory
      */
-     
     changeDirectory: function(newDirectory) {
         this.directory = newDirectory + "/";
     },
-    
-    /**
-     * Deletes all instances of sprite from the game
-     * @memberof Game 
-     * @instance
-     * @func delete
-     * @param {Sprite} sprite - Sprite to be deleted
-     */
-     
-    delete: function(sprite) {
-        let i = this.objects.indexOf(sprite);
-        if(i.active == false)
-            this.objects[i] = undefined;
-        else {
-            this.removeFromActive(this.activeObjects.indexOf(sprite));
-            this.objects[i] = undefined;
-        }
-    },
-    
-    /**
-     * Removes sprite from active scope
-     * 
-     * @memberof Game 
-     * @instance
-     * @func removeActive
-     * @param {Sprite} sprite - Sprite to be removed from active scope
-     */
-    removeActive: function(sprite) {
-        sprite.active = false;
-        sprite.memory.update();
 
-        let i = this.activeObjects.indexOf(sprite);
-        this.activeObjects[i] = undefined;
-        this.freeSpaces.push(i);
+    /**
+     * Pauses the currently running game
+     * @memberof Game.prototype
+     * @func pause
+     */
+    pause: function(){
+        this.running = true;
+        this.paused = true;
+        window.cancelAnimationFrame(this.id);
+        console.log("Game is currently paused");
     },
 
-    removeFromActive: function(index) {
-        this.activeObjects[index] = undefined;
-        this.freeSpaces.push(index);
-    },
-    
     /**
-     * Updates the world
-     * 
-     * @memberof Game 
-     * @instance
-     * @func update
+     * Resumes the game if it is paused.
+     * @memberof Game.prototype
+     * @func resume
      */
-    update: function() {
-        this.camera.updateActive();
-        this.screen.drawActive();
+    resume: function(){
+        this.running = true;
+        this.paused = false;
+        window.requestAnimationFrame(main);
+        console.log("Game is resuming...");
     },
 
-    worldInitialize: function() {
+    /**
+     * Restarts the game and runs whatever is in the init function
+     * @memberof Game.prototype
+     * @func restart
+     */
+    restart: function(){
+        if(this.running)
+            this.stop();
+        init();
+        window.requestAnimationFrame(main);
+        console.log("Game has restarted...");
+    },
+
+    /**
+     * Initializes the world through init and starts the main loop
+     * @memberof Game.prototype
+     * @func start
+     * */
+    start: function() {
         init();
         window.requestAnimationFrame(main);
         window.removeEventListener("load", this.worldInitialize);
-    }
+    },
+
+    /**
+     * Permanently stops the game loop and clears everything
+     * @memberof Game.prototype
+     * @func stop
+     * */
+    stop: function(){
+        this.running = false;
+        window.cancelAnimationFrame(this.id);
+        console.log("Game has been stopped");
+        this.timer.reset();
+        this.manager.purge();
+        this.camera.reset();
+    },
+    
+    /**
+     * Refreshes and redraws what is on screen
+     * @memberof Game.prototype
+     * @func update
+     */
+    update: function() {
+        if(!this.paused){
+            this.camera.update();
+           // this.camera.updateActive();
+            this.display.drawActive();
+            this.timer.update();
+        }
+    },
 };
