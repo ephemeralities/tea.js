@@ -1,14 +1,16 @@
 /**
- * Representation of screen which displays all game objects
+ * Creates a Display which is basically a display for all game objects.
  * 
- * @class Screen
- * @param {number} width - Sets width of the game screen
- * @param {number} height - Sets height of the game screen
+ * @class Display
+ * @param {number} width - Sets width of game display
+ * @param {number} height - Sets height of game display
  * @param {boolean} [antialiasing = false] - Sets whether antialiasing is active or not
- * 
- */
+ * @param {game} game - Current game instance
+ * */
 
-function Screen(width, height, antialiasing) {
+function Display(width, height, antialiasing, game) {
+    this.game = game;
+    this.manager = game.manager;
     this.canvas = document.createElement("canvas");
     this.canvas.height = height;
     this.canvas.width = width;
@@ -26,15 +28,11 @@ function Screen(width, height, antialiasing) {
     document.body.appendChild(this.canvas);
 }
 
-//https://stackoverflow.com/questions/32468969/rotating-a-sprite-in-a-canvas
-
-Screen.prototype = {
+Display.prototype = {
     
     /**
-     * Clears the entire screen
-     * 
-     * @memberof Screen
-     * @instance
+     * Clears the entire display
+     * @memberof Display.prototype
      * @func clear
      */
     clear: function() {
@@ -45,8 +43,7 @@ Screen.prototype = {
      * Draws sprite at the sprite's current coordinate location in conjunction
      * with the camera's position
      * 
-     * @memberof Screen
-     * @instance
+     * @memberof Display.prototype
      * @func draw
      * @param {Sprite} sprite - Sprite to draw
      */
@@ -62,35 +59,24 @@ Screen.prototype = {
     /**
      * Calls a draw for each object within active scope.
      * 
-     * @memberof Screen
-     * @instance
+     * @memberof Display.prototype
      * @func drawActive
      */
 
     drawActive: function() {
         this.clear();
-        var len = this.game.activeObjects.length;
+        var len = this.manager.active.length;
         for (var i = 0; i < len; i++) {
-            if (this.game.activeObjects[i] !== undefined)
-                if(Math.abs(this.activeObjects[i].rotation) > 0){
-                    let x = this.camera.abs(this.activeObjects[i],0) + this.activeObjects[i].width / 2;
-                    let y = this.camera.abs(this.activeObjects[i],1) + this.activeObjects[i].height / 2;
-                    this.ctx.translate(x,y);
-                    this.ctx.rotate(this.activeObjects[i].rotation * Math.PI / 180);
-                    this.draw(this.activeObjects[i]);
-                    this.ctx.rotate(-this.activeObjects[i].rotation * Math.PI / 180);
-                    this.ctx.translate(-x,-y);
-                }
-                else
-                    this.draw(this.game.activeObjects[i]);
+            if (this.manager.active[i] !== undefined)
+                this.draw(this.manager.active[i]);
         }
     },
     
     /**
-     * Rotates the entire game screen
+     * Rotates the entire game Display. Most likely impacts
+     * canvas performance, so use sparingly.
      * 
-     * @memberof Screen
-     * @instance
+     * @memberof Display.prototype
      * @func rotate
      * @param {number} degrees - Desired orientation
      */
@@ -101,24 +87,37 @@ Screen.prototype = {
     /**
      * Resizes entire canvas to a new height and width
      * 
-     * @memberof Screen
-     * @instance
-     * @func setSize
+     * @memberof Display.prototype
+     * @func resize
      * @param {number} width - Desired width
      * @param {number} height - Desired height
      * 
      * */
-    setSize: function(width, height) {
+    resize: function(width, height) {
         this.canvas.height = height;
         this.canvas.width = width;
     },
+
+    /**
+     * Updates display (draws active sprites on screen)
+     *
+     * @memberof Display.prototype
+     * @func update
+     */
+    update: function(){
+        this.clear();
+        var len = this.manager.active.length;
+        for (var i = 0; i < len; i++) {
+            if (this.manager.active[i] !== undefined)
+                this.draw(this.manager.active[i]);
+        }
+    },
     
     /**
-     * Writes text onto screen at specified coordinates.
+     * Writes text onto display at specified coordinates.
      * Useful for debugging
      * 
-     * @memberof Screen
-     * @instance
+     * @memberof Display.prototype
      * @func write
      * @param {string} string - String to write
      * @param {number} [x = 20] - X position for text
