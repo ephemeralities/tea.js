@@ -34,7 +34,7 @@ Sprites["Player"].x += 10; //in main()
 ```
 Keep in mind, if multiple sprites are created with the same name, a numbered suffix will be appended to the end of the name ("Player, Player0, Player1, Player2, ...etc). This is done to prevent an accidental overwrite of a sprite.
 
-#Camera
+# Camera
 A camera is automatically created when you create a Game. The camera can be accessed through your Game instance. The camera sports many capabilities. You can zoom in and out, change it's position on the x and y axis, anchor it to a specific point, and force it to follow a sprite. Many of the functions for the Camera can be found in the documentation.
 
 ```javascript
