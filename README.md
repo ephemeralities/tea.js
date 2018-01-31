@@ -1,5 +1,5 @@
 # Tea.js
-A basic JavaScript game engine created with elements of Scratch in mind. Kind of intended to be a simple retro game engine.
+A basic JavaScript game engine created with simplicity in mind. Kind of intended to be a simple retro game engine.
 Documentation can be found at:
 
 # Initializing the engine
@@ -50,4 +50,4 @@ if(Key.s)
 ```
 # Status
 
-As of now, the engine is in a very primitive state, and will be for quite a while. I am really only doing this for fun.
+As of now, the engine is in a very primitive state, and will be for quite a while. Currently only capable of 2-D games
