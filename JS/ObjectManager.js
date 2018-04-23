@@ -1,3 +1,9 @@
+/**
+ * Manages objects and culling of objects in the scene
+ * @class ObjectManager
+ * @param {Game} game - instance of a running game
+ **/
+
 function ObjectManager(game){
 	this.game = game;
 	this.objects = [];
